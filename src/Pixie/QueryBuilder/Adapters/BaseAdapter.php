@@ -231,6 +231,9 @@ abstract class BaseAdapter
         foreach ($data as $key => $value) {
             if ($value instanceof Raw) {
                 $statement .= $this->wrapSanitizer($key) . '=' . $value . ',';
+                if ($rawBindings = $value->getBindings()) {
+                    $bindings = array_merge($bindings, $rawBindings);
+                }
             } else {
                 $statement .= $this->wrapSanitizer($key) . '=?,';
                 $bindings[] = $value;
