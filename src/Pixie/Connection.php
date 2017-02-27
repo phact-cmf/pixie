@@ -179,4 +179,13 @@ class Connection
     {
         return static::$storedConnection;
     }
+
+    public function getHandlerAttributes()
+    {
+        return [
+            'connection' => $this,
+            'container' => $this->container,
+            'pdo' => $this->pdoInstance
+        ];
+    }
 }

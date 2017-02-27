@@ -67,23 +67,20 @@ class QueryBuilderHandler
                 throw new Exception('No database connection found.', 1);
             }
         }
+        foreach ($connection->getHandlerAttributes() as $key => $value) {
+            $this->{$key} = $value;
+        }
+        $adapterConfig = $this->connection->getAdapterConfig();
 
-        $this->connection = $connection;
-        $this->container = $this->connection->getContainer();
-        $this->pdo = $this->connection->getPdoInstance();
-        $this->adapter = $this->connection->getAdapter();
-        $this->adapterConfig = $this->connection->getAdapterConfig();
-
-        if (isset($this->adapterConfig['prefix'])) {
-            $this->tablePrefix = $this->adapterConfig['prefix'];
+        if (isset($adapterConfig['prefix'])) {
+            $this->tablePrefix = $adapterConfig['prefix'];
         }
 
-        $adapterClass = '\\Pixie\\QueryBuilder\\Adapters\\' . ucfirst($this->adapter);
+        $adapterClass = '\\Pixie\\QueryBuilder\\Adapters\\' . ucfirst($this->connection->getAdapter());
         if (!isset(self::$adapters[$adapterClass])) {
             self::$adapters[$adapterClass] = new $adapterClass($this->connection);
         }
         $this->adapterInstance = self::$adapters[$adapterClass];
-
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 

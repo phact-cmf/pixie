@@ -451,6 +451,9 @@ abstract class BaseAdapter
      *
      * @return string
      */
+    
+    static $sanitized = [];
+
     public function wrapSanitizer($value)
     {
         // Its a raw query, just cast as string, object has __toString()
@@ -459,18 +462,18 @@ abstract class BaseAdapter
         } elseif ($value instanceof \Closure) {
             return $value;
         }
-
         // Separate our table and fields which are joined with a ".",
         // like my_table.id
-        $valueArr = explode('.', $value, 2);
 
-        foreach ($valueArr as $key => $subValue) {
-            // Don't wrap if we have *, which is not a usual field
-            $valueArr[$key] = trim($subValue) == '*' ? $subValue : $this->sanitizer . $subValue . $this->sanitizer;
+        if (!isset(static::$sanitized[$value])) {
+            $valueArr = explode('.', $value, 2);
+            foreach ($valueArr as $key => $subValue) {
+                // Don't wrap if we have *, which is not a usual field
+                $valueArr[$key] = trim($subValue) == '*' ? $subValue : $this->sanitizer . $subValue . $this->sanitizer;
+            }
+            static::$sanitized[$value] = implode('.', $valueArr);
         }
-
-        // Join these back with "." and return
-        return implode('.', $valueArr);
+        return static::$sanitized[$value];
     }
 
     /**
