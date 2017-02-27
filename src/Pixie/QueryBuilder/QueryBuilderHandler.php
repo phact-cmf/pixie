@@ -3,6 +3,7 @@
 use PDO;
 use Pixie\Connection;
 use Pixie\Exception;
+use Pixie\QueryBuilder\Adapters\BaseAdapter;
 
 class QueryBuilderHandler
 {
@@ -50,6 +51,11 @@ class QueryBuilderHandler
     protected $fetchParameters = array(\PDO::FETCH_OBJ);
 
     /**
+     * @var BaseAdapter[]
+     */
+    static $adapters = [];
+
+    /**
      * @param null|\Pixie\Connection $connection
      *
      * @throws \Pixie\Exception
@@ -72,11 +78,11 @@ class QueryBuilderHandler
             $this->tablePrefix = $this->adapterConfig['prefix'];
         }
 
-        // Query builder adapter instance
-        $this->adapterInstance = $this->container->build(
-            '\\Pixie\\QueryBuilder\\Adapters\\' . ucfirst($this->adapter),
-            array($this->connection)
-        );
+        $adapterClass = '\\Pixie\\QueryBuilder\\Adapters\\' . ucfirst($this->adapter);
+        if (!isset(self::$adapters[$adapterClass])) {
+            self::$adapters[$adapterClass] = new $adapterClass($this->connection);
+        }
+        $this->adapterInstance = self::$adapters[$adapterClass];
 
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }

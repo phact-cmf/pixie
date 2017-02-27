@@ -2,6 +2,7 @@
 
 use Pixie\Connection;
 use Pixie\Exception;
+use Pixie\QueryBuilder\NestedCriteria;
 use Pixie\QueryBuilder\Raw;
 
 abstract class BaseAdapter
@@ -15,6 +16,8 @@ abstract class BaseAdapter
      * @var \Viocon\Container
      */
     protected $container;
+
+    protected $sanitizer = '`';
 
     public function __construct(Connection $connection)
     {
@@ -380,12 +383,8 @@ abstract class BaseAdapter
 
                 // Build a new NestedCriteria class, keep it by reference so any changes made
                 // in the closure should reflect here
-                $nestedCriteria = $this->container->build(
-                    '\\Pixie\\QueryBuilder\\NestedCriteria',
-                    array($this->connection)
-                );
+                $nestedCriteria = new NestedCriteria($this->connection);
 
-                $nestedCriteria = & $nestedCriteria;
                 // Call the closure with our new nestedCriteria object
                 $key($nestedCriteria);
                 // Get the criteria only query from the nestedCriteria object
